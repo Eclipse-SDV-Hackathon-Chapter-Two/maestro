@@ -29,10 +29,11 @@ spec:
       properties:
         image.url: box-truck
         driver: mike
+          hours: 10
         capacity: "100"
         temperature: "-18"
         weight: "1000"
-        fuel: "100"
+        fuel: "20"
         status: available
         location: "0,0"
         destination: "0,0"
