@@ -19,4 +19,5 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 ```
 docker build -t fuelpump:1.0 -f docker/fuel-pump/dockerfile .
+docker run -p 8000:8000 fuelpump:1.0
 ```
