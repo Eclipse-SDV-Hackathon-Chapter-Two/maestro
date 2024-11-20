@@ -23,4 +23,15 @@ spec:
         password: ""  
       inputs:
         names:
-        - "${{$trigger(truck-template, mock-truck:v1)}}"      
+        - "${{$trigger(truck-template, mock-truck:v1)}}"
+      stageSelector: ${{$if($gt($trigger(driver.hours,0),8), notify, fuel)}}
+      # ${{$if($gt($trigger(driver.hours,0),8), notify, "")}} if no next stage, empty string 
+    notify:
+      name: notify
+      provider: providers.stage.http
+      stageSelector: fuel
+      config:
+        name: test
+		    url: "https://www.bing.com", # todo update when endpoint for azure logic app is available
+		    method: "GET"
+        successCodes: [200]
