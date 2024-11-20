@@ -2,19 +2,19 @@ apiVersion: federation.symphony/v1
 kind: CatalogContainer
 metadata:
   name: box-truck
-spec:  
+spec:
 ---
 apiVersion: federation.symphony/v1
 kind: Catalog
 metadata:
   name: box-truck-v-v1
-spec: 
+spec:
   rootResource: box-truck
   catalogType: target
   properties:
     metadata:
       name: box-truck
-    spec: 
+    spec:
       displayName: box-truck
       topologies:
       - bindings:
@@ -25,15 +25,13 @@ spec:
             brokerAddress: tcp://localhost:1884
             clientID: office-2
             requestTopic: coa-request
-            responseTopic: coa-response            
+            responseTopic: coa-response
       properties:
         image.url: box-truck
-        driver: mike
         capacity: "100"
         temperature: "-18"
         weight: "1000"
-        fuel: "100"
+        fuel: "20"
         status: available
         location: "0,0"
         destination: "0,0"
-        
