@@ -1,11 +1,12 @@
 import cv2
 import torch
+import time
 
 # Load the YOLO model
 model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)  # Use a pre-trained YOLOv5 model
 
 # Configurable object type
-object_to_detect = "bottle"  # Change this to "truck", "bottle", etc., as needed
+object_to_detect = "truck"  # Change this to "truck", "bottle", etc., as needed
 
 # Set the webcam index (0 is usually the default camera)
 camera_index = 0
@@ -18,6 +19,15 @@ if not cap.isOpened():
     exit()
 
 print("Press 'q' to quit the application.")
+
+# Function to call when a truck is detected for longer than 3 seconds
+def truck_detected():
+    print("truck detected")
+    time.sleep(5)  
+
+# Main loop for real-time detection
+truck_detected_start_time = None
+truck_detected_duration = 3  # seconds
 
 # Main loop for real-time detection
 while True:
@@ -32,6 +42,10 @@ while True:
     # Filter detections based on the object_to_detect
     filtered_results = results.pandas().xyxy[0]  # Get detection results as a Pandas DataFrame
     filtered_results = filtered_results[filtered_results['name'] == object_to_detect]
+
+    # Check if a truck is detected
+    if not filtered_results.empty:
+        truck_detected()
 
     # Draw bounding boxes for filtered detections
     detection_frame = frame.copy()
