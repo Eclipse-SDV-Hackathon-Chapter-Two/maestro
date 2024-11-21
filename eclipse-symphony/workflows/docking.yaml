@@ -23,12 +23,11 @@ spec:
       inputs:
         names:
         - "${{$trigger(truck-template, mock-truck:v1)}}"
-      stageSelector: ${{$if($gt($trigger(driver.hours,0),8), notify, "")}}
+      stageSelector: ${{$if($gt($trigger(driver.hours,0),8), notify, fuel)}}
       # ${{$if($gt($trigger(driver.hours,0),8), notify, "")}} if no next stage, empty string 
     notify:
       name: notify
       provider: providers.stage.http
-      stageSelector: ""
       config:
         name: test
         url: https://prod-15.westus2.logic.azure.com:443/workflows/181cbbdad62e4efc9bcfbd75f96a0398/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=VSwvIYHnyEJMAZW2GDUamOs7v2tK9ptbVnFvj5APbeU # todo update when endpoint for azure logic app is available
@@ -38,3 +37,27 @@ spec:
         body:
           driver_name: ${{$trigger(driver.name, test)}}
           hours: ${{$trigger(driver.hours, 0)}}
+      stageSelector: check-fuel-state
+    fuel:
+      name: fuel
+      provider: providers.stage.http
+      config:
+        name: fuel
+        url: http://host.minikube.internal:8000/fuel
+        method: "POST"
+        successCodes: [ 200, 202 ]
+      inputs:
+        body:
+          current_fuel: ${{$trigger(fuel, 0)}}
+          target: 100
+          image: ${{$trigger(image.url, "")}}
+      stageSelector: "" #check-fuel-state
+    # check-fuel-state:
+    #   name: check-fuel-state
+    #   provider: providers.stage.http
+    #   config:
+    #     name: check-fuel-state
+    #     url: http://localhost:8080/fuel
+    #     method: "GET"
+    #     successCodes: [ 200, 202 ]
+    #   stageSelector: ${{$if($eq($trigger(status, available), available), dock, "")}}

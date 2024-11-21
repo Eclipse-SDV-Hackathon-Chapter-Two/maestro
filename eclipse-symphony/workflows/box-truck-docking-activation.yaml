@@ -9,3 +9,5 @@ spec:
     truck-template: box-truck:v1
     driver.name: mike
     driver.hours: 10
+    fuel: 20
+    image.url: https://github.com/eclipse-symphony/symphony/blob/sdv-hackathon-portal/docs/samples/opera/public/box-truck.png?raw=true
