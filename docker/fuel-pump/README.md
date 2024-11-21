@@ -3,7 +3,7 @@
 
 ## Local Development
 
-```
+```shell
 cd ~/maestro  #change to repo root
 sudo apt-get install -y python3-pip python3-venv
 python3 -m venv fuel-pump-env
@@ -17,7 +17,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 ## Build Container
 
-```
+```shell
 docker build -t fuelpump:1.0 -f docker/fuel-pump/dockerfile .
 docker run -p 8000:8000 fuelpump:1.0
 ```
@@ -33,7 +33,7 @@ The API exposes the following endpoints:
 - Endpoint for docking a new truck to the pump station:
 http://localhost:8000/dock \
 Example:
-```
+```shell
 curl --location 'http://localhost:8000/dock' \
 --header 'Content-Type: application/json' \
 --data '{
@@ -46,14 +46,14 @@ curl --location 'http://localhost:8000/dock' \
 - Endpoint for getting the truck details at a specific pump:
 http://localhost:8000/pump_truck \
 Example:
-```
+```shell
 curl --location 'http://localhost:8000/pump_truck?pump=1'
 ```
 
 - Endpoint for getting the current fuel level of a truck by name:
 http://localhost:8000/fuel \
 Example:
-```
+```shell
 curl --location 'http://localhost:8000/fuel' \
 --header 'Content-Type: application/json' \
 --data '{
@@ -64,7 +64,7 @@ curl --location 'http://localhost:8000/fuel' \
 - Endpoint for undocking a truck from the pump station:
 http://localhost:8000/undock \
 Example:
-```
+```shell
 curl --location 'http://localhost:8000/undock' \
 --header 'Content-Type: application/json' \
 --data '{
@@ -75,7 +75,7 @@ curl --location 'http://localhost:8000/undock' \
 - Endpoint for starting the fueling process at a pump:
 http://localhost:8000/start_fueling \
 Example:
-```
+```shell
 curl --location 'http://localhost:8000/start_fueling?pump=1' \
 --header 'Content-Type: application/json' \
 --data '{
