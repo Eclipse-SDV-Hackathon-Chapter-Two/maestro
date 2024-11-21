@@ -37,7 +37,7 @@ spec:
         body:
           driver_name: ${{$trigger(driver.name, test)}}
           hours: ${{$trigger(driver.hours, 0)}}
-      stageSelector: check-fuel-state
+      stageSelector: dock
     fuel:
       name: fuel
       provider: providers.stage.http
@@ -52,18 +52,46 @@ spec:
           target: 100
           image: ${{$trigger(image.url, "")}}
       stageSelector: check-fuel-state
-    delay:
-      name: delay
-      provider: providers.stage.delay
+    dock:
+      name: dock
+      provider: providers.stage.http
+      config:
+        name: dock
+        url: http://host.minikube.internal:8000/dock
+        method: "POST"
+        successCodes: [ 200, 202 ]
       inputs:
-        delay: 5s
+        body:
+          current_fuel: ${{$trigger(fuel, 0)}}
+          image: ${{$trigger(image.url, "")}}
+          name: ${{$trigger(truck.name, "")}}
       stageSelector: check-fuel-state
     check-fuel-state:
       name: check-fuel-state
       provider: providers.stage.http
       config:
         name: check-fuel-state
-        url: http://host.minikube.internal:8000/fuel
-        method: "GET"
+        url: http://host.minikube.internal:8000/fuel # GET not working for string replacement
+        method: "POST"
         successCodes: [ 200, 202 ]
-      stageSelector: ${{$if($lt($output(check-fuel-state, body), 100), delay, '')}}
+      inputs:
+        body:
+          name: ${{$trigger(truck.name, "")}}
+      stageSelector: ${{$if($lt($output(check-fuel-state, body), 100), delay, undock)}}
+    delay:
+      name: delay
+      provider: providers.stage.delay
+      inputs:
+        delay: 5s
+      stageSelector: check-fuel-state
+    undock:
+      name: undock
+      provider: providers.stage.http
+      config:
+        name: undock
+        url: http://host.minikube.internal:8000/undock
+        method: "POST"
+        successCodes: [ 200, 202 ]
+      inputs:
+        body:
+          name: ${{$trigger(truck.name, "")}}

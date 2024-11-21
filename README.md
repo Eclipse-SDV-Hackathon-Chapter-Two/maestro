@@ -10,6 +10,7 @@ This code uses python yolo to detect (toy) trucks from a camera input (1) and cr
 *If WSL is used, make sure docker context is set to default. Rootless (convenience script installation) context does not work.*
 
 1. Install prerequisites from https://github.com/Eclipse-SDV-Hackathon-Chapter-Two/challenge-maestro/blob/main/eclipse-symphony/README.md
-2. Run startup.sh to start the necessary processes
+
+2. Run startup.sh to start the necessary processes (hint: if this is the first time running, maestro up has to be started manually before)
 
 Run showdown.sh to kill all started processes
