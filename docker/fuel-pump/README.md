@@ -55,15 +55,22 @@ curl --location 'http://localhost:8000/pump_truck?pump=1'
 http://localhost:8000/fuel \
 Example:
 ```
-curl --location 'http://localhost:8000/fuel?name=Markus'
+curl --location 'http://localhost:8000/fuel' \
+--header 'Content-Type: application/json' \
+--data '{
+    "name": "Markus"
+}
 ```
 
 - Endpoint for undocking a truck from the pump station:
 http://localhost:8000/undock \
 Example:
 ```
-curl --location --request POST 'http://localhost:8000/undock?name=Markus' \
---data ''
+curl --location 'http://localhost:8000/undock' \
+--header 'Content-Type: application/json' \
+--data '{
+    "name": "Markus"
+}'
 ```
 
 - Endpoint for starting the fueling process at a pump:
