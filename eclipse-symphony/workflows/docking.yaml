@@ -37,7 +37,7 @@ spec:
         body:
           driver_name: ${{$trigger(driver.name, test)}}
           hours: ${{$trigger(driver.hours, 0)}}
-      stageSelector: check-fuel-state
+      stageSelector: dock
     fuel:
       name: fuel
       provider: providers.stage.http
@@ -51,13 +51,47 @@ spec:
           current_fuel: ${{$trigger(fuel, 0)}}
           target: 100
           image: ${{$trigger(image.url, "")}}
-      stageSelector: "" #check-fuel-state
-    # check-fuel-state:
-    #   name: check-fuel-state
-    #   provider: providers.stage.http
-    #   config:
-    #     name: check-fuel-state
-    #     url: http://localhost:8080/fuel
-    #     method: "GET"
-    #     successCodes: [ 200, 202 ]
-    #   stageSelector: ${{$if($eq($trigger(status, available), available), dock, "")}}
+      stageSelector: check-fuel-state
+    dock:
+      name: dock
+      provider: providers.stage.http
+      config:
+        name: dock
+        url: http://host.minikube.internal:8000/dock
+        method: "POST"
+        successCodes: [ 200, 202 ]
+      inputs:
+        body:
+          current_fuel: ${{$trigger(fuel, 0)}}
+          image: ${{$trigger(image.url, "")}}
+          name: ${{$trigger(truck.name, "")}}
+      stageSelector: check-fuel-state
+    check-fuel-state:
+      name: check-fuel-state
+      provider: providers.stage.http
+      config:
+        name: check-fuel-state
+        url: http://host.minikube.internal:8000/fuel # GET not working for string replacement
+        method: "POST"
+        successCodes: [ 200, 202 ]
+      inputs:
+        body:
+          name: ${{$trigger(truck.name, "")}}
+      stageSelector: ${{$if($lt($output(check-fuel-state, body), 100), delay, undock)}}
+    delay:
+      name: delay
+      provider: providers.stage.delay
+      inputs:
+        delay: 5s
+      stageSelector: check-fuel-state
+    undock:
+      name: undock
+      provider: providers.stage.http
+      config:
+        name: undock
+        url: http://host.minikube.internal:8000/undock
+        method: "POST"
+        successCodes: [ 200, 202 ]
+      inputs:
+        body:
+          name: ${{$trigger(truck.name, "")}}

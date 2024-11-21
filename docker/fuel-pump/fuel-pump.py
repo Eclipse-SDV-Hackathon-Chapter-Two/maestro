@@ -57,9 +57,9 @@ def fill_fuel(pump: int):
             time.sleep(1)        
 
 #Get current fuel level by name
-@app.get("/fuel")
-def get_fuel_state(name: str):
-    state = get_truck_state(name)
+@app.post("/fuel")
+def get_fuel_state(request: dict):
+    state = get_truck_state(request["name"])
     if state is None:
         raise HTTPException(status_code=404, detail="Truck not found")
     return state.current_fuel
@@ -84,8 +84,8 @@ def update_dock_state(truck: Truck):
 
 #Undock truck by name
 @app.post("/undock")
-def undock_truck(name: str):
-    pump = get_truck_pump(name)
+def undock_truck(request: dict):
+    pump = get_truck_pump(request["name"])
     if pump == -1:
         raise HTTPException(status_code=404, detail="Truck not found")
     fuel_pump_truck_states[pump] = None
