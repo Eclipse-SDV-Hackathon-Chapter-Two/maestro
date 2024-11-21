@@ -24,6 +24,7 @@ spec:
         names:
         - "${{$trigger(truck-template, mock-truck:v1)}}"
       stageSelector: ${{$if($gt($trigger(driver.hours,0),8), notify, fuel)}}
+      stageSelector: ${{$if($gt($trigger(driver.hours,0),8), notify, fuel)}}
       # ${{$if($gt($trigger(driver.hours,0),8), notify, "")}} if no next stage, empty string 
     notify:
       name: notify
