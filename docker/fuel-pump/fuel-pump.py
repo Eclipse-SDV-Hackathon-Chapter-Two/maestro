@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import json
 import os
@@ -7,48 +8,101 @@ import threading
 
 app = FastAPI()
 
+
 FUEL_STATE_FILE = 'fuel_state.json'
 
-class FuelUpdate(BaseModel):
+class Truck(BaseModel):
     current_fuel: int
-    target: int
+    image: str
+    name: str
 
-def load_fuel_state():
-    if os.path.exists(FUEL_STATE_FILE):
-        with open(FUEL_STATE_FILE, 'r') as file:
-            return json.load(file)
-    return {"fuel_percent": 0}
+#Store truck states
+fuel_pump_truck_states = {1: None, 2: None, 3: None}
+fuel_pump_threads = {1: None, 2: None, 3: None}
+fuel_pump_locks = {1: threading.Lock(), 2: threading.Lock(), 3: threading.Lock()}
 
-def save_fuel_state(state):
-    with open(FUEL_STATE_FILE, 'w') as file:
-        json.dump(state, file)
+#Get pump number of truck by name
+def get_truck_pump(truck_name):
+    for pump in fuel_pump_truck_states:
+        if fuel_pump_truck_states[pump] is not None and fuel_pump_truck_states[pump].name == truck_name:
+            return pump
+    return -1
 
-fuel_lock = threading.Lock()
-fuel_thread = None
-fuel_state = load_fuel_state()
+#Get state of truck by name
+def get_truck_state(truck_name):
+    pump = get_truck_pump(truck_name)
+    if pump == -1:
+        return None
+    return fuel_pump_truck_states[pump]
 
-def fill_fuel(update: FuelUpdate):
-    global fuel_state
-    while update.current_fuel < update.target:
-        with fuel_lock:
-            update.current_fuel += 1
-            fuel_state['fuel_percent'] = update.current_fuel
-            save_fuel_state(fuel_state)
-        time.sleep(1)        
+#Get next empty pump
+def get_empty_pump():
+    for pump in fuel_pump_truck_states:
+        if fuel_pump_truck_states[pump] is None:
+            return pump
+    return -1
 
+#Start filling fuel process
+def fill_fuel(pump: int):
+    if pump < 1 or pump > 3:
+        return -1
+    
+    global fuel_pump_truck_states
+    if not pump in fuel_pump_truck_states or fuel_pump_truck_states[pump] is None:
+        return -1
+    
+    with fuel_pump_locks[pump]:
+        while fuel_pump_truck_states[pump].current_fuel < 100:
+            fuel_pump_truck_states[pump].current_fuel += 1
+            time.sleep(1)        
 
+#Get current fuel level by name
 @app.get("/fuel")
-def get_fuel_state():
-    return fuel_state
+def get_fuel_state(name: str):
+    state = get_truck_state(name)
+    if state is None:
+        raise HTTPException(status_code=404, detail="Truck not found")
+    return state.current_fuel
 
-@app.post("/fuel")
-def update_fuel_state(update: FuelUpdate):
-    if update.current_fuel < 0 or update.target <= 0:
-        raise HTTPException(status_code=400, detail="Invalid fuel values")#
-    global fuel_thread
-    if fuel_thread is None or not fuel_thread.is_alive():
-        fuel_thread = threading.Thread(target=fill_fuel, args=(update,))
-        fuel_thread.start()
+#Get truck data by pump id
+@app.get("/pump_truck")
+def get_fuel_state_by_id(pump: int):
+    if not pump in fuel_pump_truck_states or fuel_pump_truck_states[pump] is None:
+        return None
+    return fuel_pump_truck_states[pump]
+
+#Dock a new truck to next empty pump
+@app.post("/dock")
+def update_dock_state(truck: Truck):
+    if truck.current_fuel < 0:
+        raise HTTPException(status_code=400, detail="Invalid fuel values")
+    pump = get_empty_pump()
+    if pump == -1:
+        raise HTTPException(status_code=400, detail="All pumps are full")
+    fuel_pump_truck_states[pump] = truck
+    return 200
+
+#Undock truck by name
+@app.post("/undock")
+def undock_truck(name: str):
+    pump = get_truck_pump(name)
+    if pump == -1:
+        raise HTTPException(status_code=404, detail="Truck not found")
+    fuel_pump_truck_states[pump] = None
+    return 200
+
+#Start the fueling process by pump id
+@app.post("/start_fueling")
+def start_fueling(pump: int):
+    if pump < 1 or pump > 3:
+        raise HTTPException(status_code=400, detail="Invalid pump number")
+    
+    global fuel_pump_threads
+    if fuel_pump_threads[pump] is None or not fuel_pump_threads[pump].is_alive():
+        fuel_pump_threads[pump] = threading.Thread(target=fill_fuel, args=(pump,))
+        fuel_pump_threads[pump].start()
     else:
         raise HTTPException(status_code=400, detail="Fuel update already in progress")
     return 200
+
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
