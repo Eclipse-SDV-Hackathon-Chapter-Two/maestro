@@ -24,7 +24,6 @@ docker run -p 8000:8000 fuelpump:1.0
 
 ## API Documentation
 
-
 After the docker container is started, the webpage is available at http://localhost:8000/
 
 ![API Documentation](./.img/webpage.png)

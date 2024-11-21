@@ -8,9 +8,6 @@ import threading
 
 app = FastAPI()
 
-
-FUEL_STATE_FILE = 'fuel_state.json'
-
 class Truck(BaseModel):
     current_fuel: int
     image: str
