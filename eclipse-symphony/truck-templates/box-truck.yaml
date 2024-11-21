@@ -27,11 +27,9 @@ spec:
             requestTopic: coa-request
             responseTopic: coa-response
       properties:
-        image.url: box-truck
         capacity: "100"
         temperature: "-18"
         weight: "1000"
-        fuel: "20"
         status: available
         location: "0,0"
         destination: "0,0"
