@@ -51,7 +51,7 @@ def fill_fuel(pump: int):
     with fuel_pump_locks[pump]:
         while fuel_pump_truck_states[pump].current_fuel < 100:
             fuel_pump_truck_states[pump].current_fuel += 1
-            time.sleep(1)        
+            time.sleep(0.2)        
 
 #Get current fuel level by name
 @app.post("/fuel")
