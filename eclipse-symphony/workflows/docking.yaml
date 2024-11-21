@@ -43,7 +43,7 @@ spec:
       provider: providers.stage.http
       config:
         name: fuel
-        url: http://host.minikube.internal:8000/fuel
+        url: http://fuel-pump-service:8000/fuel
         method: "POST"
         successCodes: [ 200, 202 ]
       inputs:
@@ -51,13 +51,34 @@ spec:
           current_fuel: ${{$trigger(fuel, 0)}}
           target: 100
           image: ${{$trigger(image.url, "")}}
-      stageSelector: "" #check-fuel-state
-    # check-fuel-state:
-    #   name: check-fuel-state
-    #   provider: providers.stage.http
-    #   config:
-    #     name: check-fuel-state
-    #     url: http://localhost:8080/fuel
-    #     method: "GET"
-    #     successCodes: [ 200, 202 ]
-    #   stageSelector: ${{$if($eq($trigger(status, available), available), dock, "")}}
+      stageSelector: check-fuel-state
+    delay:
+      name: delay
+      provider: providers.stage.delay
+      inputs:
+        delay: 5s
+      stageSelector: check-fuel-state
+    check-fuel-state:
+      name: check-fuel-state
+      provider: providers.stage.http
+      config:
+        name: check-fuel-state
+        url: http://fuel-pump-service:8000/fuel
+        method: "GET"
+        successCodes: [ 200, 202 ]
+      stageSelector: patch-target
+    patch-target:
+      name: patch-target
+      provider: providers.stage.patch
+      config:
+        baseUrl: http://symphony-service:8080/v1alpha2/
+        user: admin
+        password: ""
+      inputs:
+        objectType: target
+        objectName: avl-truck
+        patchSource: inline
+        patchContent:
+          properties:
+            fuel: ${{$output(check-fuel-state, body)}}
+      stageSelector: ${{$if($lt($output(check-fuel-state, body), 100), delay, '')}}

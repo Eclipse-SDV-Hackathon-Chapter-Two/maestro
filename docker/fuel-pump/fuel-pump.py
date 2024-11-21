@@ -39,7 +39,7 @@ def fill_fuel(update: FuelUpdate):
 
 @app.get("/fuel")
 def get_fuel_state():
-    return fuel_state
+    return fuel_state['fuel_percent']
 
 @app.post("/fuel")
 def update_fuel_state(update: FuelUpdate):
