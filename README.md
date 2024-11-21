@@ -11,9 +11,33 @@ Follow the setup steps below to prepare for the execution of the project.
 One feature had to be added on the symphony repo. In order to use the feature "patching symphony targets" it is required to build symphony. This feature allows to observe the fuel state in symphony opera. To get this feature, use option 1.  
 
 ### Build and Install Symphony (option 1)
-* IMPORTANT: This does not work with any Ubuntu WSL > 20.04. So Ubuntu 20.04 on Win11 WSL2 was used to run this *
+*IMPORTANT: This does not work with any Ubuntu WSL > 20.04. So Ubuntu 20.04 on Win11 WSL2 was used to run this. Even with the help of Haishi, we did not manage to get this to work. He created a custom build for us*
 
+To run custom build of Haishi:
+```shell
+cd ~/symphony/test/localenv
+maestro up -s 0.48-exp.34
+
+# if minikube can not load images, load them manually
+docker pull quay.io/jetstack/cert-manager-controller:v1.13.1
+docker pull quay.io/jetstack/cert-manager-cainjector:v1.13.1
+docker pull quay.io/jetstack/cert-manager-webhook:v1.13.1
+docker pull redis/redis-stack-server:7.2.0-v12
+docker pull openzipkin/zipkin-slim:2.24.1
+
+minikube image load quay.io/jetstack/cert-manager-controller:v1.13.1
+minikube image load quay.io/jetstack/cert-manager-cainjector:v1.13.1
+minikube image load quay.io/jetstack/cert-manager-webhook:v1.13.1
+minikube image load redis/redis-stack-server:7.2.0-v12
+minikube image load openzipkin/zipkin-slim:2.24.1
+
+# all pods should be started now
+kubectl get pods
 ```
+Stop here if the commands above worked.
+
+
+``` shell
 # Install Docker
 cd ~
 sudo apt-get update -y
@@ -96,7 +120,7 @@ k9s
 
 ### Using Maestro
 
-```
+```shell
 wget -q https://raw.githubusercontent.com/eclipse-symphony/symphony/master/cli/install/install.sh -O - | /bin/bash
 
 maestro up 
@@ -105,7 +129,7 @@ maestro up
 
 ## Post Installation
 
-```
+```shell
 cd ~
 
 git clone git@github.com:Eclipse-SDV-Hackathon-Chapter-Two/maestro.git
@@ -144,13 +168,13 @@ EOF
 1. [Truck Detection](/truck_detection/README.md) to read camera input and trigger symphony campaign
 2. [Fuel Pump](/docker/fuel-pump/README.md) to build and start docker container that simulates fuel pump
 3. A convenience script that configures port forwarding has been added 
- ```
+ ```shell
  cd ~/maestro
  ./startup.sh
  ```
 
 To shut down all processes, run:
-```
+```shell
 cd ~/maestro
 ./showdown.sh
 ```
