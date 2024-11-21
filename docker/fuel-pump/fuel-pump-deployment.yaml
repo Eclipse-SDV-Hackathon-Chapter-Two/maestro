@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: fuel-pump-container
-        image: hbai/fuelpump:1.1
+        image: fuelpump:1.0
         ports:
         - containerPort: 8000
 ---
