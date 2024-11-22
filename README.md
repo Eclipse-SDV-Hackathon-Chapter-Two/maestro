@@ -178,3 +178,8 @@ To shut down all processes, run:
 cd ~/maestro
 ./showdown.sh
 ```
+
+## Testing Strategy
+Test is done manually as the testing of the whole process with the orchestration is not really automizable. \
+For manual testing the symphony campaign and the docker images has to be started. Then activate the symphony campaign as described in the readme. Open the fuel pump portal and once a truck is docked, click the fuel up button and check if the fuel is increased. Shortly after the fueling is completed, the truck should be undocked and vanish from the platform. \
+In a future implementation, a github workflow could be created which handles the deployment and testing automatically.
